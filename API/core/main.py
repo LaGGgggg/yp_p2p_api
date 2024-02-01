@@ -18,19 +18,6 @@ tags_metadata = [
 ]
 
 
-def lifespan(_: FastAPI):
-
-    db = get_db_not_dependency()
-
-    all_scopes = [str(i) for i in crud.get_all_scopes(db)]
-
-    for scope_name in SETTINGS.OAUTH2_SCHEME_SCOPES:
-        if scope_name not in all_scopes:
-            crud.create_scope(db, schemas.ScopeCreate(name=scope_name))
-
-    yield
-
-
 app = FastAPI(
     title='YP_P2P_API',
     description='Yandex practicum p2p API',
@@ -40,7 +27,6 @@ app = FastAPI(
         'email': 'poni22poni23@yandex.ru',
     },
     openapi_tags=tags_metadata,
-    lifespan=lifespan,
     openapi_url=SETTINGS.OPENAPI_URL,
 )
 
@@ -51,6 +37,19 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
+@app.on_event('startup')
+async def startup_db_scopes_init() -> None:
+
+    db = get_db_not_dependency()
+
+    all_scopes = [str(i) for i in crud.get_all_scopes(db)]
+
+    for scope_name in SETTINGS.OAUTH2_SCHEME_SCOPES:
+        if scope_name not in all_scopes:
+            crud.create_scope(db, schemas.ScopeCreate(name=scope_name))
+
 
 app.include_router(users.router)
 app.include_router(system.router)

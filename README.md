@@ -63,16 +63,21 @@ ALGORITHM - [алгоритм](https://fastapi.tiangolo.com/tutorial/security/oa
 для хеширования паролей в базе данных<br>
 DEBUG - True/False, определяет логику логирования, в продакшене должен (must) быть False<br>
 
-### 5. Запустите миграции базы данных
+### 5. Перейдите в корневой каталог API
+
+```bash
+cd API
+```
+
+### 6. Запустите миграции базы данных
 
 ```bash
 alembic upgrade head
 ```
 
-### 6. Запустите проект
+### 7. Запустите проект
 
 ```bash
-cd API
 uvicorn core.main:app --reload
 ```
 

@@ -1,0 +1,34 @@
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, UniqueConstraint
+
+from .database import Base
+
+
+class Scope(Base):
+
+    __tablename__ = 'scopes'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+
+    def __str__(self):
+        return self.name
+
+
+class User(Base):
+
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    is_active = Column(Boolean, default=True)
+
+
+class UserToScope(Base):
+
+    __tablename__ = 'users_to_scopes'
+    __table_args__ = (UniqueConstraint('user_id', 'scope_id'),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    scope_id = Column(Integer, ForeignKey('scopes.id'))

@@ -5,53 +5,63 @@ from core import schemas
 from . import models
 
 
-def _add_to_db_and_refresh(db: Session, object_to_add) -> None:
-
-    db.add(object_to_add)
-    db.commit()
-    db.refresh(object_to_add)
-
-
-def get_all_scopes(db: Session) -> list[models.Scope]:
-    return db.query(models.Scope).all()
+class BaseCrud:
+    
+    def add_to_db_and_refresh(self, db: Session, object_to_add) -> None:
+        db.add(object_to_add)
+        db.commit()
+        db.refresh(object_to_add)
 
 
-def create_scope(db: Session, scope: schemas.ScopeCreate) -> models.Scope:
+    def create(self, db: Session, object: self.scheme) -> self.model:
 
-    db_scope = models.Scope(**scope.dict())
+        db_object = self.model(**object.dict())
 
-    _add_to_db_and_refresh(db, db_scope)
+        self.add_to_db_and_refresh(db, db_object)
 
-    return db_scope
-
-
-def get_user_by_username(db: Session, username: str) -> models.User | None:
-    return db.query(models.User).filter(models.User.username == username).first()
+        return db_object
 
 
-def _get_password_hash(password: str, pwd_context: CryptContext) -> str:
-    return pwd_context.hash(password)
+    def get_all(self, db: Session) -> list[self.model]:
+        return db.query(self.model).all()
 
 
-def create_user(db: Session, user: schemas.UserCreate, pwd_context: CryptContext) -> models.User:
-
-    hashed_password = _get_password_hash(user.password, pwd_context)
-
-    db_user = models.User(username=user.username, hashed_password=hashed_password)
-
-    _add_to_db_and_refresh(db, db_user)
-
-    return db_user
+class UserCrud(BaseCrud):
+    def __init__(self):
+        self.model = models.User
+        self.scheme = schemas.UserCreate
 
 
-def get_user_scopes(db: Session, user: schemas.User) -> list[models.Scope]:
-    return db.query(models.Scope).join(models.UserToScope).filter(models.UserToScope.user_id == user.id).all()
+    def create_with_pwd_context(self, db: Session, user: schemas.UserCreate, pwd_context: CryptContext) -> self.model:
+
+        hashed_password = self.get_password_hash(user.password, pwd_context)
+
+        db_user = self.model(username=user.username, hashed_password=hashed_password)
+
+        self.add_to_db_and_refresh(db, db_user)
+
+        return db_user
 
 
-def create_user_to_scope(db: Session, user_to_scope: schemas.UserToScopeCreate) -> models.UserToScope:
+    def get_by_username(self, db: Session, username: str) -> self.model | None:
+        return db.query(self.model).filter(self.model.username == username).first()
 
-    db_user_to_scope = models.UserToScope(**user_to_scope.dict())
 
-    _add_to_db_and_refresh(db, db_user_to_scope)
+    def get_password_hash(self, password: str, pwd_context: CryptContext) -> str:
+        return pwd_context.hash(password)
 
-    return db_user_to_scope
+
+class ScopeCrud(BaseCrud):
+    def __init__(self):
+        self.model = models.Scope
+        self.scheme = schemas.ScopeCreate
+
+
+class UserToScopeCrud(BaseCrud):
+    def __init__(self):
+        self.model = models.UserToScope
+        self.scheme = schemas.UserToScopeCreate
+
+
+    def get_user_scopes(self, db: Session, user: schemas.User) -> list[models.Scope]:
+        return db.query(models.Scope).join(self.model).filter(self.model.user_id == user.id).all()

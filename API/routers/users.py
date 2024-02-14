@@ -29,7 +29,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 @login_manager.user_loader()
 def get_user(username: str, db: Session = get_db_not_dependency()) -> models.User | None:
-    return crud.get_user_by_username(db, username)
+    return crud.UserCrud().get_by_username(db, username)
 
 
 @router.post(f'/{SETTINGS.TOKEN_URL}', response_model=schemas.Token)
@@ -45,7 +45,7 @@ def login(
     if not verify_password(form_data.password, user.hashed_password):
         raise InvalidCredentialsException
 
-    user_scopes = [i.name for i in crud.get_user_scopes(db, user)]
+    user_scopes = [i.name for i in crud.UserToScopeCrud().get_user_scopes(db, user)]
 
     if not all([(scope in SETTINGS.OAUTH2_SCHEME_SCOPES) and (scope in user_scopes) for scope in form_data.scopes]):
         raise HTTPException(
@@ -71,6 +71,6 @@ def get_user_me_data(
 
     current_user = schemas.User.from_orm(current_user)
 
-    current_user.available_scopes = crud.get_user_scopes(db, current_user)
+    current_user.available_scopes = crud.UserToScopeCrud().get_user_scopes(db, current_user)
 
     return current_user

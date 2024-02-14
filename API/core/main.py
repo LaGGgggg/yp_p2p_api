@@ -44,11 +44,11 @@ async def startup_db_scopes_init() -> None:
 
     db = get_db_not_dependency()
 
-    all_scopes = [str(i) for i in crud.get_all_scopes(db)]
+    all_scopes = [str(i) for i in crud.ScopeCrud().get_all(db)]
 
     for scope_name in SETTINGS.OAUTH2_SCHEME_SCOPES:
         if scope_name not in all_scopes:
-            crud.create_scope(db, schemas.ScopeCreate(name=scope_name))
+            crud.ScopeCrud().create(db, schemas.ScopeCreate(name=scope_name))
 
 
 app.include_router(users.router)

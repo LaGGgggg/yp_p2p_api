@@ -21,7 +21,7 @@ pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 def create_superuser(username: str, password: str, db: Session) -> None:
 
     try:
-        user = crud.create_user(db, schemas.UserCreate(username=username, password=password), pwd_context)
+        user = crud.UserCrud().create_with_pwd_context(db, schemas.UserCreate(username=username, password=password), pwd_context)
 
     except IntegrityError:
 
@@ -29,13 +29,13 @@ def create_superuser(username: str, password: str, db: Session) -> None:
 
         db.rollback()
 
-        user = crud.get_user_by_username(db, username)
+        user = crud.UserCrud().get_by_username(db, username)
 
-    all_user_scopes = crud.get_user_scopes(db, user)
+    all_user_scopes = crud.UserToScopeCrud().get_user_scopes(db, user)
 
-    for scope in crud.get_all_scopes(db):
+    for scope in crud.ScopeCrud().get_all(db):
         if scope not in all_user_scopes:
-            crud.create_user_to_scope(db, schemas.UserToScopeCreate(user_id=user.id, scope_id=scope.id))
+            crud.UserToScopeCrud().create(db, schemas.UserToScopeCreate(user_id=user.id, scope_id=scope.id))
 
 
 if __name__ == '__main__':

@@ -6,23 +6,20 @@ from . import models
 
 
 class BaseCrud:
-    
     def add_to_db_and_refresh(self, db: Session, object_to_add) -> None:
         db.add(object_to_add)
         db.commit()
         db.refresh(object_to_add)
 
+    def create(self, db: Session, object_to_create):
 
-    def create(self, db: Session, object: self.scheme) -> self.model:
-
-        db_object = self.model(**object.dict())
+        db_object = self.model(**object_to_create.dict())
 
         self.add_to_db_and_refresh(db, db_object)
 
         return db_object
 
-
-    def get_all(self, db: Session) -> list[self.model]:
+    def get_all(self, db: Session) -> list:
         return db.query(self.model).all()
 
 
@@ -31,8 +28,7 @@ class UserCrud(BaseCrud):
         self.model = models.User
         self.scheme = schemas.UserCreate
 
-
-    def create_with_pwd_context(self, db: Session, user: schemas.UserCreate, pwd_context: CryptContext) -> self.model:
+    def create_with_pwd_context(self, db: Session, user: schemas.UserCreate, pwd_context: CryptContext):
 
         hashed_password = self.get_password_hash(user.password, pwd_context)
 
@@ -42,10 +38,8 @@ class UserCrud(BaseCrud):
 
         return db_user
 
-
-    def get_by_username(self, db: Session, username: str) -> self.model | None:
+    def get_by_username(self, db: Session, username: str):
         return db.query(self.model).filter(self.model.username == username).first()
-
 
     def get_password_hash(self, password: str, pwd_context: CryptContext) -> str:
         return pwd_context.hash(password)
@@ -61,7 +55,6 @@ class UserToScopeCrud(BaseCrud):
     def __init__(self):
         self.model = models.UserToScope
         self.scheme = schemas.UserToScopeCreate
-
 
     def get_user_scopes(self, db: Session, user: schemas.User) -> list[models.Scope]:
         return db.query(models.Scope).join(self.model).filter(self.model.user_id == user.id).all()

@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from starlette.responses import Response
 from passlib.context import CryptContext
 
@@ -74,3 +75,41 @@ def get_user_me_data(
     current_user.available_scopes = crud.get_user_scopes(db, current_user)
 
     return current_user
+
+
+@router.post('/create_user', response_model=schemas.User)
+def create_user(
+        username: str,
+        password: str,
+        discord_id: int,
+        db: Session = Depends(get_db),
+        current_user: models.User = Security(login_manager, scopes=['register']),
+):
+    try:
+        return schemas.User.from_orm(crud.create_user(db, schemas.UserCreate(
+            username=username, password=password, discord_id=discord_id
+        ), pwd_context))
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Not unique username or discord id',
+        )
+
+
+
+
+    # Валидация данных силами FastAPI
+    # Проверка дубликата пользователя
+    #if crud.get_user_by_username(db, user.username):
+    #    raise HTTPException(status_code=400, detail='Username already registered')
+
+    #if crud.get_user_by_discord_id(db, user.discord_id):
+    #   raise HTTPException(status_code=400, detail='Discord ID already registered')
+
+    # Проверка сложности пароля
+     # if not utils.is_strong_password(user.password):
+       # raise HTTPException(status_code=400, detail='Weak password')
+
+    # Создание нового пользователя в базе данных
+
+    # return new_user

@@ -175,8 +175,8 @@ docker compose logs -f
 Это файл, который может исполнять команды:
 ```bash
 # создаёт пользователя со всеми правами
-# *вмести "username" и "password" подставте свои имя пользователя и пароль
-python utils.py create_superuser username password
+# *вместо "username", "password" и "discord_id" подставьте свои имя пользователя, пароль и discord id
+python utils.py create_superuser username password discord_id
 ```
 
 # Об архитектуре

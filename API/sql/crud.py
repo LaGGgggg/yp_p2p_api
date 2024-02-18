@@ -4,57 +4,58 @@ from passlib.context import CryptContext
 from core import schemas
 from . import models
 
+from .database import Base
+from typing import Type
+from abc import ABC
 
-class BaseCrud:
-    def add_to_db_and_refresh(self, db: Session, object_to_add) -> None:
-        db.add(object_to_add)
-        db.commit()
-        db.refresh(object_to_add)
 
-    def create(self, db: Session, object_to_create):
+class BaseCrud(ABC):
+    def __init__(self, model: Type[Base], scheme: Type[schemas.BaseModel], db: Session) -> None:
+        self.model = model
+        self.scheme = scheme
+        self.db = db
 
-        db_object = self.model(**object_to_create.dict())
+    def add_to_db_and_refresh(self, object_to_add: Type[Base]) -> None:
+        self.db.add(object_to_add)
+        self.db.commit()
+        self.db.refresh(object_to_add)
 
-        self.add_to_db_and_refresh(db, db_object)
-
+    def create(self, **kwargs):
+        db_object = self.model(**kwargs)
+        self.add_to_db_and_refresh(db_object)
         return db_object
 
-    def get_all(self, db: Session) -> list:
-        return db.query(self.model).all()
+    def get(self, *args, **kwargs) -> Type[Base]:
+        return self.db.query(self.model).get(*args, **kwargs)
+
+    def get_many(self, *args, **kwargs) -> list[Type[Base]]:
+        return self.db.query(self.model).filter(*args, **kwargs).all()
 
 
 class UserCrud(BaseCrud):
-    def __init__(self):
-        self.model = models.User
-        self.scheme = schemas.UserCreate
+    def __init__(self, db: Session) -> None:
+        self.pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+        super().__init__(models.User, schemas.UserCreate, db)
 
-    def create_with_pwd_context(self, db: Session, user: schemas.UserCreate, pwd_context: CryptContext):
+    def create(self, user: schemas.UserCreate):
+        hashed_password = self.get_password_hash(user.password)
+        return super().create(usernsme=user, hashed_password=hashed_password)
 
-        hashed_password = self.get_password_hash(user.password, pwd_context)
+    def get_by_username(self, username: str):
+        return self.db.query(self.model).filter(self.model.username == username).first()
 
-        db_user = self.model(username=user.username, hashed_password=hashed_password)
-
-        self.add_to_db_and_refresh(db, db_user)
-
-        return db_user
-
-    def get_by_username(self, db: Session, username: str):
-        return db.query(self.model).filter(self.model.username == username).first()
-
-    def get_password_hash(self, password: str, pwd_context: CryptContext) -> str:
-        return pwd_context.hash(password)
+    def get_password_hash(self, password: str) -> str:
+        return self.pwd_context.hash(password)
 
 
 class ScopeCrud(BaseCrud):
-    def __init__(self):
-        self.model = models.Scope
-        self.scheme = schemas.ScopeCreate
+    def __init__(self, db: Session) -> None:
+        super().__init__(models.Scope, schemas.ScopeCreate, db)
 
 
 class UserToScopeCrud(BaseCrud):
-    def __init__(self):
-        self.model = models.UserToScope
-        self.scheme = schemas.UserToScopeCreate
+    def __init__(self, db: Session) -> None:
+        super().__init__(models.UserToScope, schemas.UserToScopeCreate, db)
 
-    def get_user_scopes(self, db: Session, user: schemas.User) -> list[models.Scope]:
-        return db.query(models.Scope).join(self.model).filter(self.model.user_id == user.id).all()
+    def get_user_scopes(self, user: schemas.User) -> list[models.Scope]:
+        return self.db.query(models.Scope).join(self.model).filter(self.model.user_id == user.id).all()

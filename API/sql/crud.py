@@ -20,8 +20,8 @@ class BaseCrud(ABC):
         self.db.commit()
         self.db.refresh(object_to_add)
 
-    def create(self, **kwargs):
-        db_object = self.model(**kwargs)
+    def create(self, schema: Type[schemas.BaseModel]) -> Type[Base]:
+        db_object = self.model(**schema.dict())
         self.add_to_db_and_refresh(db_object)
         return db_object
 
@@ -37,15 +37,13 @@ class UserCrud(BaseCrud):
         self.pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
         super().__init__(models.User, schemas.UserCreate, db)
 
-    def create(self, user: schemas.UserCreate):
-        hashed_password = self.get_password_hash(user.password)
-        return super().create(usernsme=user, hashed_password=hashed_password)
-
-    def get_by_username(self, username: str):
-        return self.db.query(self.model).filter(self.model.username == username).first()
-
     def get_password_hash(self, password: str) -> str:
         return self.pwd_context.hash(password)
+
+    def create(self, user_create: schemas.UserCreate) -> Type[Base]:
+        hashed_password = self.get_password_hash(user_create.password)
+        user_create_db = schemas.UserCreateDB(hashed_password=hashed_password, username=user_create.username)
+        return super().create(user_create_db)
 
 
 class ScopeCrud(BaseCrud):

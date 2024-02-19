@@ -29,7 +29,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 @login_manager.user_loader()
 def get_user(username: str, db: Session = get_db_not_dependency()) -> models.User | None:
-    return crud.UserCrud(db).get_by_username(username=username)
+    return crud.UserCrud(db).get(username=username)
 
 
 @router.post(f'/{SETTINGS.TOKEN_URL}', response_model=schemas.Token)

@@ -29,7 +29,7 @@ def create_superuser(username: str, password: str, db: Session) -> None:
 
         db.rollback()
 
-        user = crud.UserCrud(db).get_by_username(username=username)
+        user = crud.UserCrud(db).get(username=username)
 
     all_user_scopes = crud.UserToScopeCrud(db).get_user_scopes(user)
 

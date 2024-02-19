@@ -18,10 +18,12 @@ SETTINGS = get_settings()
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
-def create_superuser(username: str, password: str, db: Session) -> None:
+def create_superuser(username: str, password: str, discord_id: str, db: Session) -> None:
 
     try:
-        user = crud.create_user(db, schemas.UserCreate(username=username, password=password), pwd_context)
+        user = crud.create_user(
+            db, schemas.UserCreate(username=username, password=password, discord_id=int(discord_id)), pwd_context
+        )
 
     except IntegrityError:
 
@@ -40,7 +42,7 @@ def create_superuser(username: str, password: str, db: Session) -> None:
 
 if __name__ == '__main__':
 
-    if 'create_superuser' in argv and len(argv) == 4:
+    if 'create_superuser' in argv and len(argv) == 5:
 
         try:
 

@@ -37,7 +37,7 @@ def create_user(db: Session, user: schemas.UserCreate, pwd_context: CryptContext
 
     hashed_password = _get_password_hash(user.password, pwd_context)
 
-    db_user = models.User(username=user.username, hashed_password=hashed_password)
+    db_user = models.User(username=user.username, hashed_password=hashed_password, discord_id=user.discord_id)
 
     _add_to_db_and_refresh(db, db_user)
 

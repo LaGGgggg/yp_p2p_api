@@ -25,7 +25,7 @@ def create_superuser(username: str, password: str, db: Session) -> None:
 
     except IntegrityError:
 
-        warning('The user already exists')
+        warning("The user already exists, just updates the user's scopes")
 
         db.rollback()
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
             create_superuser(*argv[2:], db=get_db_not_dependency())
 
-            info('Superuser successfully created')
+            info('Superuser successfully created/updated')
 
         except Exception as e:
             error(f'Something went wrong\n{e}')

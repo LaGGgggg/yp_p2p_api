@@ -20,24 +20,26 @@ pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 def create_superuser(username: str, password: str, discord_id: str, db: Session) -> None:
 
+    discord_id = int(discord_id)
+
     try:
-        user = crud.create_user(
-            db, schemas.UserCreate(username=username, password=password, discord_id=int(discord_id)), pwd_context
+        user = crud.UserCrud(db).create(
+            schemas.UserCreate(username=username, password=password, discord_id=discord_id)
         )
 
     except IntegrityError:
 
-        warning('The user already exists')
+        warning("The user already exists, just updates the user's scopes")
 
         db.rollback()
 
-        user = crud.get_user_by_username(db, username)
+        user = crud.UserCrud(db).get(username=username) or crud.UserCrud(db).get(discord_id=discord_id)
 
-    all_user_scopes = crud.get_user_scopes(db, user)
+    all_user_scopes = crud.UserToScopeCrud(db).get_user_scopes(user)
 
-    for scope in crud.get_all_scopes(db):
+    for scope in crud.ScopeCrud(db).get_many():
         if scope not in all_user_scopes:
-            crud.create_user_to_scope(db, schemas.UserToScopeCreate(user_id=user.id, scope_id=scope.id))
+            crud.UserToScopeCrud(db).create(schemas.UserToScopeCreate(user_id=user.id, scope_id=scope.id))
 
 
 if __name__ == '__main__':
@@ -48,7 +50,7 @@ if __name__ == '__main__':
 
             create_superuser(*argv[2:], db=get_db_not_dependency())
 
-            info('Superuser successfully created')
+            info('Superuser successfully created/updated')
 
         except Exception as e:
             error(f'Something went wrong\n{e}')

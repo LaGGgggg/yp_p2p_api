@@ -4,54 +4,58 @@ from passlib.context import CryptContext
 from core import schemas
 from . import models
 
-
-def _add_to_db_and_refresh(db: Session, object_to_add) -> None:
-
-    db.add(object_to_add)
-    db.commit()
-    db.refresh(object_to_add)
+from .database import Base
+from typing import Type
+from abc import ABC
 
 
-def get_all_scopes(db: Session) -> list[models.Scope]:
-    return db.query(models.Scope).all()
+class BaseCrud(ABC):
+    def __init__(self, model: Type[Base], scheme: Type[schemas.BaseModel], db: Session) -> None:
+        self.model = model
+        self.scheme = scheme
+        self.db = db
+
+    def add_to_db_and_refresh(self, object_to_add: Type[Base]) -> None:
+        self.db.add(object_to_add)
+        self.db.commit()
+        self.db.refresh(object_to_add)
+
+    def create(self, schema: Type[schemas.BaseModel]) -> Type[Base]:
+        db_object = self.model(**schema.dict())
+        self.add_to_db_and_refresh(db_object)
+        return db_object
+
+    def get(self, **kwargs) -> Type[Base]:
+        return self.db.query(self.model).filter_by(**kwargs).first()
+
+    def get_many(self, *args, **kwargs) -> list[Type[Base]]:
+        return self.db.query(self.model).filter(*args, **kwargs).all()
 
 
-def create_scope(db: Session, scope: schemas.ScopeCreate) -> models.Scope:
+class UserCrud(BaseCrud):
+    def __init__(self, db: Session) -> None:
+        self.pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+        super().__init__(models.User, schemas.UserCreate, db)
 
-    db_scope = models.Scope(**scope.dict())
+    def get_password_hash(self, password: str) -> str:
+        return self.pwd_context.hash(password)
 
-    _add_to_db_and_refresh(db, db_scope)
-
-    return db_scope
-
-
-def get_user_by_username(db: Session, username: str) -> models.User | None:
-    return db.query(models.User).filter(models.User.username == username).first()
-
-
-def _get_password_hash(password: str, pwd_context: CryptContext) -> str:
-    return pwd_context.hash(password)
-
-
-def create_user(db: Session, user: schemas.UserCreate, pwd_context: CryptContext) -> models.User:
-
-    hashed_password = _get_password_hash(user.password, pwd_context)
-
-    db_user = models.User(username=user.username, hashed_password=hashed_password, discord_id=user.discord_id)
-
-    _add_to_db_and_refresh(db, db_user)
-
-    return db_user
+    def create(self, user_create: schemas.UserCreate) -> Type[Base]:
+        hashed_password = self.get_password_hash(user_create.password)
+        user_create_db = schemas.UserCreateDB(
+            hashed_password=hashed_password, username=user_create.username, discord_id=user_create.discord_id
+        )
+        return super().create(user_create_db)
 
 
-def get_user_scopes(db: Session, user: schemas.User) -> list[models.Scope]:
-    return db.query(models.Scope).join(models.UserToScope).filter(models.UserToScope.user_id == user.id).all()
+class ScopeCrud(BaseCrud):
+    def __init__(self, db: Session) -> None:
+        super().__init__(models.Scope, schemas.ScopeCreate, db)
 
 
-def create_user_to_scope(db: Session, user_to_scope: schemas.UserToScopeCreate) -> models.UserToScope:
+class UserToScopeCrud(BaseCrud):
+    def __init__(self, db: Session) -> None:
+        super().__init__(models.UserToScope, schemas.UserToScopeCreate, db)
 
-    db_user_to_scope = models.UserToScope(**user_to_scope.dict())
-
-    _add_to_db_and_refresh(db, db_user_to_scope)
-
-    return db_user_to_scope
+    def get_user_scopes(self, user: schemas.User) -> list[models.Scope]:
+        return self.db.query(models.Scope).join(self.model).filter(self.model.user_id == user.id).all()

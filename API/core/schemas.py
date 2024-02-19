@@ -33,6 +33,10 @@ class UserCreate(UserBase):
     password: str
 
 
+class UserCreateDB(UserBase):
+    hashed_password: str
+
+
 class User(UserBase):
 
     id: int

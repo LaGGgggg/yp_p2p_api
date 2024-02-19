@@ -25,8 +25,8 @@ class BaseCrud(ABC):
         self.add_to_db_and_refresh(db_object)
         return db_object
 
-    def get(self, *args, **kwargs) -> Type[Base]:
-        return self.db.query(self.model).get(*args, **kwargs)
+    def get(self, **kwargs) -> Type[Base]:
+        return self.db.query(self.model).filter_by(**kwargs).first()
 
     def get_many(self, *args, **kwargs) -> list[Type[Base]]:
         return self.db.query(self.model).filter(*args, **kwargs).all()

@@ -20,8 +20,12 @@ pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 def create_superuser(username: str, password: str, discord_id: str, db: Session) -> None:
 
+    discord_id = int(discord_id)
+
     try:
-        user = crud.UserCrud(db).create(schemas.UserCreate(username=username, password=password, discord_id=int(discord_id)))
+        user = crud.UserCrud(db).create(
+            schemas.UserCreate(username=username, password=password, discord_id=discord_id)
+        )
 
     except IntegrityError:
 
@@ -29,7 +33,7 @@ def create_superuser(username: str, password: str, discord_id: str, db: Session)
 
         db.rollback()
 
-        user = crud.UserCrud(db).get(username=username)
+        user = crud.UserCrud(db).get(username=username) or crud.UserCrud(db).get(discord_id=discord_id)
 
     all_user_scopes = crud.UserToScopeCrud(db).get_user_scopes(user)
 

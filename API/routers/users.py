@@ -86,9 +86,11 @@ def create_user(
         _: models.User = Security(login_manager, scopes=['register']),
 ):
     try:
-        return schemas.User.from_orm(crud.create_user(
-            db, schemas.UserCreate(username=username, password=password, discord_id=discord_id), pwd_context
-        ))
+
+        user_create_schema = schemas.UserCreate(username=username, password=password, discord_id=discord_id)
+
+        return schemas.User.from_orm(crud.UserCrud(db).create(user_create_schema))
+
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

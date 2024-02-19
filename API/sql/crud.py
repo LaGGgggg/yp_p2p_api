@@ -43,7 +43,7 @@ class UserCrud(BaseCrud):
     def create(self, user_create: schemas.UserCreate) -> Type[Base]:
         hashed_password = self.get_password_hash(user_create.password)
         user_create_db = schemas.UserCreateDB(
-          hashed_password=hashed_password, username=user_create.username, discord_id=user.discord_id
+            hashed_password=hashed_password, username=user_create.username, discord_id=user_create.discord_id
         )
         return super().create(user_create_db)
 

@@ -24,7 +24,9 @@ class Scope(ScopeBase):
 
 
 class UserBase(BaseModel):
+
     username: str
+    discord_id: int
 
 
 class UserCreate(UserBase):

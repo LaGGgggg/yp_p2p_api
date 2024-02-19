@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, UniqueConstraint, BigInteger
 
 from .database import Base
 
@@ -22,6 +22,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
+    discord_id = Column(BigInteger, unique=True, index=True)
 
 
 class UserToScope(Base):

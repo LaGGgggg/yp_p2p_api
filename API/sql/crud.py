@@ -28,8 +28,8 @@ class BaseCrud(ABC):
     def get(self, **kwargs) -> Type[Base]:
         return self.db.query(self.model).filter_by(**kwargs).first()
 
-    def get_many(self, *args, **kwargs) -> list[Type[Base]]:
-        return self.db.query(self.model).filter(*args, **kwargs).all()
+    def get_many(self, **kwargs) -> list[Type[Base]]:
+        return self.db.query(self.model).filter_by(**kwargs).all()
 
 
 class UserCrud(BaseCrud):

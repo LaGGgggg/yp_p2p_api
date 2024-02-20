@@ -8,7 +8,7 @@ class Scope(Base):
     __tablename__ = 'scopes'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
+    name = Column(String, unique=True, index=True, nullable=False)
 
     def __str__(self):
         return self.name
@@ -19,10 +19,10 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    username = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-    discord_id = Column(BigInteger, unique=True, index=True)
+    discord_id = Column(BigInteger, unique=True, index=True, nullable=False)
 
 
 class UserToScope(Base):

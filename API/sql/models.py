@@ -31,5 +31,5 @@ class UserToScope(Base):
     __table_args__ = (UniqueConstraint('user_id', 'scope_id'),)
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    scope_id = Column(Integer, ForeignKey('scopes.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    scope_id = Column(Integer, ForeignKey('scopes.id'), nullable=False)

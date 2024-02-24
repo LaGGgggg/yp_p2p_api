@@ -5,7 +5,7 @@ from sql import crud
 from sql.database import get_db, get_db_not_dependency
 from . import schemas
 from .config import get_settings
-from routers import system, users
+from routers import system, users, p2p_request
 
 
 SETTINGS = get_settings()
@@ -52,4 +52,5 @@ async def startup_db_scopes_init() -> None:
 
 
 app.include_router(users.router)
+app.include_router(p2p_request.router)
 app.include_router(system.router)

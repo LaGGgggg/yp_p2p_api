@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -8,10 +11,12 @@ class Token(BaseModel):
 
 
 class ScopeBase(BaseModel):
+
     name: str
 
 
 class ScopeCreate(ScopeBase):
+
     pass
 
 
@@ -30,10 +35,12 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
+
     password: str
 
 
 class UserCreateDB(UserBase):
+
     hashed_password: str
 
 
@@ -44,6 +51,7 @@ class User(UserBase):
     available_scopes: list[Scope] = []
 
     class Config:
+
         from_attributes = True
 
 
@@ -54,12 +62,35 @@ class UserToScopeBase(BaseModel):
 
 
 class UserToScopeCreate(UserToScopeBase):
+
     pass
 
 
 class UserToScope(UserToScopeBase):
 
     id: int
+
+    class Config:
+        from_attributes = True
+
+
+class P2PRequestBase(BaseModel):
+    repository_link: str
+    comment: str
+    review_state: Literal['pending', 'progress', 'completed']
+
+
+class P2PRequestCreate(P2PRequestBase):
+    creator_id: int
+    reviewer_id: int | None = None
+    review_state: Literal['pending', 'progress', 'completed'] = 'pending'
+
+
+class P2PRequest(P2PRequestBase):
+    id: int
+    publication_date: datetime
+    creator: User
+    reviewer: User | None
 
     class Config:
         from_attributes = True

@@ -57,6 +57,23 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def render_item(type_, obj, autogen_context):
+    """Apply custom rendering for selected items."""
+
+    if type_ == 'type' and obj.__class__.__module__.startswith('sqlalchemy_utils.'):
+
+        autogen_context.imports.add(f'import {obj.__class__.__module__}')
+
+        if hasattr(obj, 'choices'):
+            return f'{obj.__class__.__module__}.{obj.__class__.__name__}(choices={obj.choices})'
+
+        else:
+            return f'{obj.__class__.__module__}.{obj.__class__.__name__}()'
+
+    # default rendering for other objects
+    return False
+
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
@@ -71,7 +88,9 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata, render_item=render_item
+        )
 
         with context.begin_transaction():
             context.run_migrations()

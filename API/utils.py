@@ -1,21 +1,25 @@
 from sys import argv
 from logging import INFO, basicConfig, info, warning, error
+from typing import Callable
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from passlib.context import CryptContext
 
 from sql.database import get_db_not_dependency
 from sql import crud
 from core import schemas
-from core.config import get_settings
 
 
 basicConfig(level=INFO)
 
-SETTINGS = get_settings()
+BLUE = '\033[0;34m'
+YELLOW = '\033[0;33m'
+RED = '\033[0;31m'
+NO_COLOR = '\033[0m'
 
-pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+
+def log_with_color(log_function: Callable, message: str, color: str = BLUE) -> None:
+    log_function(f'{color}{message}{NO_COLOR}')
 
 
 def create_superuser(username: str, password: str, discord_id: str, db: Session) -> None:
@@ -29,7 +33,7 @@ def create_superuser(username: str, password: str, discord_id: str, db: Session)
 
     except IntegrityError:
 
-        warning("The user already exists, just updates the user's scopes")
+        log_with_color(warning, "The user already exists, just updates the user's scopes", YELLOW)
 
         db.rollback()
 
@@ -41,19 +45,18 @@ def create_superuser(username: str, password: str, discord_id: str, db: Session)
         if scope not in all_user_scopes:
             crud.UserToScopeCrud(db).create(schemas.UserToScopeCreate(user_id=user.id, scope_id=scope.id))
 
+    log_with_color(info, 'Superuser successfully created/updated')
+
 
 if __name__ == '__main__':
 
     if 'create_superuser' in argv and len(argv) == 5:
 
         try:
-
             create_superuser(*argv[2:], db=get_db_not_dependency())
 
-            info('Superuser successfully created/updated')
-
         except Exception as e:
-            error(f'Something went wrong\n{e}')
+            log_with_color(error, f'Something went wrong\n{e}', RED)
 
     else:
-        error('Unknown command or incorrect command arguments')
+        log_with_color(error, 'Unknown command or incorrect command arguments', RED)

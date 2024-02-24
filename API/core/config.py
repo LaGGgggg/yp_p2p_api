@@ -4,6 +4,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from pydantic import PostgresDsn, BaseModel
+from pydantic import PostgresDsn, BaseModel, ValidationError
 from pydantic_settings import BaseSettings as PydanticBaseSettings
 from pydantic_settings import SettingsConfigDict
 from fastapi.security import OAuth2PasswordBearer
@@ -23,6 +24,8 @@ class BaseSettings(BaseModel):
     ACCESS_TOKEN_EXPIRE_MINUTES: float
     TOKEN_URL: str
     DEBUG: bool
+    DATABASE_URL_TEST: PostgresDsn | None = None
+    IS_TEST: bool = False  # needed only for automated testing purposes
 
 
 class RawSettings(BaseSettings, PydanticBaseSettings):
@@ -88,5 +91,8 @@ def get_settings() -> Settings:
     settings = Settings(ORIGINS=origins, OAUTH2_SCHEME=oauth2_scheme, **raw_settings.dict())
 
     settings.LOGGING['loggers']['main']['handlers'] = ['console'] if settings.DEBUG else ['file']
+
+    if settings.IS_TEST and not settings.DATABASE_URL_TEST:
+        raise ValidationError('To run tests, you need to set the DATABASE_URL_TEST environment variable')
 
     return settings

@@ -47,6 +47,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=120
 TOKEN_URL=token
 ALGORITHM=HS256
 DEBUG=True
+DATABASE_URL_TEST=postgresql://<username>:<password>@localhost:5432/<database_name>  # не является обязательным
 ```
 _**Не забудьте поменять значения на свои! (поставьте его после "=")**_
 
@@ -62,6 +63,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES - значение по умолчанию для и
 ALGORITHM - [алгоритм](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/?h=algorithm#hash-and-verify-the-passwords)
 для хеширования паролей в базе данных<br>
 DEBUG - True/False, определяет логику логирования, в продакшене должен (must) быть False<br>
+DATABASE_URL_TEST - [url базы данных](https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls) sqlalchemy для тестирования.
+До тех пор, пока вы не проводите запуск тестов с pytest, вам можно не устанавливать эту переменную окружения<br>
 
 ### 5. Перейдите в корневой каталог API
 
@@ -177,6 +180,18 @@ docker compose logs -f
 # создаёт пользователя со всеми правами
 # *вместо "username", "password" и "discord_id" подставьте свои имя пользователя, пароль и discord id
 python utils.py create_superuser username password discord_id
+```
+
+# [pytest_runner.py](API/pytest_runner.py)
+
+В проекте есть поддержка тестирования с [pytest](https://docs.pytest.org/en/stable/). Запускать pytest
+рекомендуется при помощи [pytest_runner.py](API/pytest_runner.py). Этот файл сначала очистит тестовую базу данных,
+потом применит все миграции alembic, и только после этого запустит pytest. Такие меры позволяют корректно работать
+с базой данных в ходе тестирования.<br>
+*Однако, вы всё ещё можете запустить pytest классическим способом, но помните, что
+вам необходимо будет самостоятельно подготовить тестовую базу данных.*
+```bash
+python pytest_runner.py
 ```
 
 # Об архитектуре

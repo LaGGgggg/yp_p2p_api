@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,6 +11,21 @@ from routers import system, users
 
 
 SETTINGS = get_settings()
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+
+    db = get_db_not_dependency()
+
+    all_scopes = [str(i) for i in crud.ScopeCrud(db).get_many()]
+
+    for scope_name in SETTINGS.OAUTH2_SCHEME_SCOPES:
+        if scope_name not in all_scopes:
+            crud.ScopeCrud(db).create(schemas.ScopeCreate(name=scope_name))
+
+    yield
+
 
 tags_metadata = [
     {
@@ -28,6 +45,7 @@ app = FastAPI(
     },
     openapi_tags=tags_metadata,
     openapi_url=SETTINGS.OPENAPI_URL,
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -37,18 +55,6 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
-
-
-@app.on_event('startup')
-async def startup_db_scopes_init() -> None:
-
-    db = get_db_not_dependency()
-
-    all_scopes = [str(i) for i in crud.ScopeCrud(db).get_many()]
-
-    for scope_name in SETTINGS.OAUTH2_SCHEME_SCOPES:
-        if scope_name not in all_scopes:
-            crud.ScopeCrud(db).create(schemas.ScopeCreate(name=scope_name))
 
 
 app.include_router(users.router)

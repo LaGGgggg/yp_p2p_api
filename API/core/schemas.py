@@ -14,7 +14,6 @@ class ScopeBase(BaseModel):
 
 
 class ScopeCreate(ScopeBase):
-
     pass
 
 
@@ -53,7 +52,6 @@ class UserToScopeBase(BaseModel):
 
 
 class UserToScopeCreate(UserToScopeBase):
-
     pass
 
 

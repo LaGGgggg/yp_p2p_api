@@ -2,12 +2,9 @@ from fastapi import APIRouter, Depends, Security
 from sqlalchemy.orm import Session
 
 from sql import crud, models
-from sql.database import get_db, get_db_not_dependency
+from sql.database import get_db
 from core import schemas
-from core.config import get_settings
 from core.login_manager import login_manager
-
-SETTINGS = get_settings()
 
 router = APIRouter(tags=['p2p_request'])
 

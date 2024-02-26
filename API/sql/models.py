@@ -48,7 +48,7 @@ class P2PRequest(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     repository_link = Column(String, index=True, nullable=False)
-    comment = Column(String)
+    comment = Column(String, nullable=False, default='')
     creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     publication_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     review_state = Column(ChoiceType(REVIEW_STATE_CHOICES), nullable=False)

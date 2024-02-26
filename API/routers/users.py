@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from starlette.responses import Response
 from passlib.context import CryptContext
-
 from fastapi_login.exceptions import InvalidCredentialsException
 
 from sql import crud, models

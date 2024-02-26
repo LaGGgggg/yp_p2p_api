@@ -12,6 +12,7 @@ from fastapi.security import OAuth2PasswordBearer
 OAUTH2_SCHEME_SCOPES = {
     'me': 'can see the logged in user profile',
     'register': 'can register new users',
+    'p2p_request': 'can interact with p2p_request',
 }
 
 

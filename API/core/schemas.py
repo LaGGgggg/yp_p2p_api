@@ -1,8 +1,10 @@
+from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
 
 
 class Token(BaseModel):
-
     access_token: str
     token_type: str
 
@@ -16,14 +18,12 @@ class ScopeCreate(ScopeBase):
 
 
 class Scope(ScopeBase):
-
     model_config = ConfigDict(from_attributes=True)
 
     id: int
 
 
 class UserBase(BaseModel):
-
     username: str
     discord_id: int
 
@@ -37,7 +37,6 @@ class UserCreateDB(UserBase):
 
 
 class User(UserBase):
-
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -46,7 +45,6 @@ class User(UserBase):
 
 
 class UserToScopeBase(BaseModel):
-
     user_id: int
     scope_id: int
 
@@ -56,7 +54,27 @@ class UserToScopeCreate(UserToScopeBase):
 
 
 class UserToScope(UserToScopeBase):
-
     model_config = ConfigDict(from_attributes=True)
-
+  
     id: int
+
+
+class P2PRequestBase(BaseModel):
+    repository_link: str
+    comment: str
+    review_state: Literal['pending', 'progress', 'completed']
+
+
+class P2PRequestCreate(P2PRequestBase):
+    creator_id: int
+    reviewer_id: int | None = None
+    review_state: Literal['pending', 'progress', 'completed'] = 'pending'
+
+
+class P2PRequest(P2PRequestBase):
+    model_config = ConfigDict(from_attributes=True)
+  
+    id: int
+    publication_date: datetime
+    creator: User
+    reviewer: User | None

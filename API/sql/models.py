@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, UniqueConstraint, BigInteger
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, UniqueConstraint, BigInteger, DateTime
+from sqlalchemy.sql import func
+from sqlalchemy_utils import ChoiceType
 
 from .database import Base
 
@@ -33,3 +35,21 @@ class UserToScope(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     scope_id = Column(Integer, ForeignKey('scopes.id'), nullable=False)
+
+
+class P2PRequest(Base):
+    __tablename__ = 'p2p_requests'
+
+    REVIEW_STATE_CHOICES = [
+        ('pending', 'Pending'),
+        ('progress', 'Progress'),
+        ('completed', 'Completed'),
+    ]
+
+    id = Column(Integer, primary_key=True, index=True)
+    repository_link = Column(String, index=True, nullable=False)
+    comment = Column(String, nullable=False, default='')
+    creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    publication_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    review_state = Column(ChoiceType(REVIEW_STATE_CHOICES), nullable=False)
+    reviewer_id = Column(Integer, ForeignKey('users.id'))

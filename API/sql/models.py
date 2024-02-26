@@ -10,7 +10,7 @@ class Scope(Base):
     __tablename__ = 'scopes'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
+    name = Column(String, unique=True, index=True, nullable=False)
 
     def __str__(self):
         return self.name
@@ -21,10 +21,10 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    username = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-    discord_id = Column(BigInteger, unique=True, index=True)
+    discord_id = Column(BigInteger, unique=True, index=True, nullable=False)
 
 
 class UserToScope(Base):
@@ -33,8 +33,8 @@ class UserToScope(Base):
     __table_args__ = (UniqueConstraint('user_id', 'scope_id'),)
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    scope_id = Column(Integer, ForeignKey('scopes.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    scope_id = Column(Integer, ForeignKey('scopes.id'), nullable=False)
 
 
 class P2PRequest(Base):

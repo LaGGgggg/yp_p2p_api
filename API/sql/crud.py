@@ -21,15 +21,15 @@ class BaseCrud(ABC):
         self.db.refresh(object_to_add)
 
     def create(self, schema: Type[schemas.BaseModel]) -> Type[Base]:
-        db_object = self.model(**schema.dict())
+        db_object = self.model(**schema.model_dump())
         self.add_to_db_and_refresh(db_object)
         return db_object
 
     def get(self, **kwargs) -> Type[Base]:
         return self.db.query(self.model).filter_by(**kwargs).first()
 
-    def get_many(self, *args, **kwargs) -> list[Type[Base]]:
-        return self.db.query(self.model).filter(*args, **kwargs).all()
+    def get_many(self, **kwargs) -> list[Type[Base]]:
+        return self.db.query(self.model).filter_by(**kwargs).all()
 
 
 class UserCrud(BaseCrud):

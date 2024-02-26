@@ -69,7 +69,7 @@ def get_user_me_data(
     if not current_user.is_active:
         return InvalidCredentialsException
 
-    current_user = schemas.User.from_orm(current_user)
+    current_user = schemas.User.model_validate(current_user)
 
     current_user.available_scopes = crud.UserToScopeCrud(db).get_user_scopes(current_user)
 
@@ -88,7 +88,7 @@ def create_user(
 
         user_create_schema = schemas.UserCreate(username=username, password=password, discord_id=discord_id)
 
-        return schemas.User.from_orm(crud.UserCrud(db).create(user_create_schema))
+        return schemas.User.model_validate(crud.UserCrud(db).create(user_create_schema))
 
     except IntegrityError:
         raise HTTPException(

@@ -21,7 +21,7 @@ class BaseCrud(ABC):
         self.db.refresh(object_to_add)
 
     def create(self, schema: Type[schemas.BaseModel]) -> Type[Base]:
-        db_object = self.model(**schema.dict())
+        db_object = self.model(**schema.model_dump())
         self.add_to_db_and_refresh(db_object)
         return db_object
 

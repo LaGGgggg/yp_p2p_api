@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Token(BaseModel):
@@ -17,10 +17,9 @@ class ScopeCreate(ScopeBase):
 
 class Scope(ScopeBase):
 
-    id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: int
 
 
 class UserBase(BaseModel):
@@ -39,12 +38,11 @@ class UserCreateDB(UserBase):
 
 class User(UserBase):
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     is_active: bool = True
     available_scopes: list[Scope] = []
-
-    class Config:
-        from_attributes = True
 
 
 class UserToScopeBase(BaseModel):
@@ -59,7 +57,6 @@ class UserToScopeCreate(UserToScopeBase):
 
 class UserToScope(UserToScopeBase):
 
-    id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: int

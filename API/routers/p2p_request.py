@@ -24,3 +24,13 @@ def create_p2p_request(
 
     return True
 
+
+@router.get('/p2p_request/review')
+def p2p_request_review(
+        current_user: models.User = Security(login_manager, scopes=['p2p_request']),
+        db: Session = Depends(get_db)
+) -> dict:
+    repository_link, comment = crud.P2PRequestCrud(db).start_review(current_user)
+    if not repository_link and not comment:
+        return {'problem': 'There are not any pending projects'}
+    return {'link': repository_link, 'comment': comment}

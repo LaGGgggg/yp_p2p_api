@@ -53,3 +53,4 @@ class P2PRequest(Base):
     publication_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     review_state = Column(ChoiceType(REVIEW_STATE_CHOICES), nullable=False)
     reviewer_id = Column(Integer, ForeignKey('users.id'))
+    review_start_date = Column(DateTime(timezone=True))

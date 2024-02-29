@@ -8,6 +8,8 @@ from .database import Base
 from typing import Type
 from abc import ABC
 
+from datetime import datetime
+
 
 class BaseCrud(ABC):
     def __init__(self, model: Type[Base], scheme: Type[schemas.BaseModel], db: Session) -> None:
@@ -64,3 +66,17 @@ class UserToScopeCrud(BaseCrud):
 class P2PRequestCrud(BaseCrud):
     def __init__(self, db: Session) -> None:
         super().__init__(models.P2PRequest, schemas.P2PRequestCreate, db)
+
+    def start_review(self, reviewer):
+        project = self.db.query(self.model) \
+            .filter(self.model.review_state == 'pending', self.model.creator_id != reviewer.id) \
+            .order_by(self.model.publication_date) \
+            .first()
+        if not project:
+            return '', ''
+        project.reviewer_id = reviewer.id
+        project.review_state = 'progress'
+        project.review_start_date = datetime.now()
+        self.db.add(project)
+        self.db.commit()
+        return project.repository_link, project.comment

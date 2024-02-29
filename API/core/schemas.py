@@ -68,6 +68,7 @@ class P2PRequestBase(BaseModel):
 class P2PRequestCreate(P2PRequestBase):
     creator_id: int
     reviewer_id: int | None = None
+    review_start_date: datetime | None = None
     review_state: Literal['pending', 'progress', 'completed'] = 'pending'
 
 
@@ -78,3 +79,4 @@ class P2PRequest(P2PRequestBase):
     publication_date: datetime
     creator: User
     reviewer: User | None
+    review_start_date: datetime | None

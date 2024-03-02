@@ -40,6 +40,10 @@ class UserToScope(Base):
 class P2PRequest(Base):
     __tablename__ = 'p2p_requests'
 
+    PENDING = 'pending'
+    PROGRESS = 'progress'
+    COMPLETED = 'completed'
+
     REVIEW_STATE_CHOICES = [
         ('pending', 'Pending'),
         ('progress', 'Progress'),

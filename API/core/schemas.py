@@ -78,6 +78,8 @@ class P2PRequest(P2PRequestBase):
   
     id: int
     publication_date: datetime
-    creator: User
-    reviewer: User | None
     review_start_date: datetime | None
+
+
+class ErrorResponse(BaseModel):
+    context: str

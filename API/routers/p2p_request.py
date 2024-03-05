@@ -29,10 +29,10 @@ def create_p2p_request(
 def p2p_request_review(
         current_user: models.User = Security(login_manager, scopes=['p2p_request']),
         db: Session = Depends(get_db)
-):
     project = crud.P2PRequestCrud(db).start_review(current_user.id)
+) -> schemas.P2PRequest | schemas.ErrorResponse:
 
     if not project:
-        return {'error': 'There are not any pending projects'}
+        return schemas.ErrorResponse(context='There are not any pending projects')
 
-    return project
+    return schemas.P2PRequest.model_validate(project)

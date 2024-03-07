@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy_utils import ChoiceType
 
 from .database import Base
+from .models_choices_enums import ReviewStateChoicesEnum
 
 
 class Scope(Base):
@@ -40,10 +41,14 @@ class UserToScope(Base):
 class P2PRequest(Base):
     __tablename__ = 'p2p_requests'
 
+    PENDING = ReviewStateChoicesEnum.PENDING.value
+    PROGRESS = ReviewStateChoicesEnum.PROGRESS.value
+    COMPLETED = ReviewStateChoicesEnum.COMPLETED.value
+
     REVIEW_STATE_CHOICES = [
-        ('pending', 'Pending'),
-        ('progress', 'Progress'),
-        ('completed', 'Completed'),
+        (PENDING, 'Pending'),
+        (PROGRESS, 'Progress'),
+        (COMPLETED, 'Completed'),
     ]
 
     id = Column(Integer, primary_key=True, index=True)
@@ -53,3 +58,4 @@ class P2PRequest(Base):
     publication_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     review_state = Column(ChoiceType(REVIEW_STATE_CHOICES), nullable=False)
     reviewer_id = Column(Integer, ForeignKey('users.id'))
+    review_start_date = Column(DateTime(timezone=True))

@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
+
+from sql.models_choices_enums import ReviewStateChoicesEnum
 
 
 class Token(BaseModel):
@@ -62,13 +63,14 @@ class UserToScope(UserToScopeBase):
 class P2PRequestBase(BaseModel):
     repository_link: str
     comment: str
-    review_state: Literal['pending', 'progress', 'completed']
+    review_state: ReviewStateChoicesEnum
 
 
 class P2PRequestCreate(P2PRequestBase):
     creator_id: int
     reviewer_id: int | None = None
-    review_state: Literal['pending', 'progress', 'completed'] = 'pending'
+    review_start_date: datetime | None = None
+    review_state: ReviewStateChoicesEnum = ReviewStateChoicesEnum.PENDING.value
 
 
 class P2PRequest(P2PRequestBase):
@@ -76,5 +78,8 @@ class P2PRequest(P2PRequestBase):
   
     id: int
     publication_date: datetime
-    creator: User
-    reviewer: User | None
+    review_start_date: datetime | None
+
+
+class ErrorResponse(BaseModel):
+    context: str

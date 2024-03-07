@@ -1,18 +1,18 @@
+from .database import Base
+from typing import Type
+from abc import ABC
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 
 from core import schemas
 from . import models
 
-from .database import Base
-from typing import Type
-from abc import ABC
-
 
 class BaseCrud(ABC):
-    def __init__(self, model: Type[Base], scheme: Type[schemas.BaseModel], db: Session) -> None:
+    def __init__(self, model: Type[Base], db: Session) -> None:
         self.model = model
-        self.scheme = scheme
         self.db = db
 
     def add_to_db_and_refresh(self, object_to_add: Type[Base]) -> None:
@@ -35,7 +35,7 @@ class BaseCrud(ABC):
 class UserCrud(BaseCrud):
     def __init__(self, db: Session) -> None:
         self.pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-        super().__init__(models.User, schemas.UserCreate, db)
+        super().__init__(models.User, db)
 
     def get_password_hash(self, password: str) -> str:
         return self.pwd_context.hash(password)
@@ -50,12 +50,12 @@ class UserCrud(BaseCrud):
 
 class ScopeCrud(BaseCrud):
     def __init__(self, db: Session) -> None:
-        super().__init__(models.Scope, schemas.ScopeCreate, db)
+        super().__init__(models.Scope, db)
 
 
 class UserToScopeCrud(BaseCrud):
     def __init__(self, db: Session) -> None:
-        super().__init__(models.UserToScope, schemas.UserToScopeCreate, db)
+        super().__init__(models.UserToScope, db)
 
     def get_user_scopes(self, user: schemas.User) -> list[models.Scope]:
         return self.db.query(models.Scope).join(self.model).filter(self.model.user_id == user.id).all()
@@ -63,4 +63,20 @@ class UserToScopeCrud(BaseCrud):
 
 class P2PRequestCrud(BaseCrud):
     def __init__(self, db: Session) -> None:
-        super().__init__(models.P2PRequest, schemas.P2PRequestCreate, db)
+        super().__init__(models.P2PRequest, db)
+
+    def start_review(self, reviewer_id: int) -> models.P2PRequest | None:
+
+        project = self.db.query(self.model).filter(
+            self.model.review_state == self.model.PENDING, self.model.creator_id != reviewer_id
+        ).order_by(self.model.publication_date).first()
+
+        if not project:
+            return None
+
+        project.reviewer_id = reviewer_id
+        project.review_state = self.model.PROGRESS
+        project.review_start_date = datetime.now()
+        self.db.commit()
+
+        return project

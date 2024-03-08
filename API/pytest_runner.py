@@ -9,16 +9,16 @@ environ['IS_TEST'] = 'True'
 # (this causes settings setup)
 from subprocess import run
 
-from sql.database import SessionLocal
+from sql.database import get_db_not_dependency
 from sql.models import Base
 
 
-with SessionLocal() as db:
+db = get_db_not_dependency()
 
-    for table in reversed(Base.metadata.tables.values()):
-        db.query(table).delete()
+for table in reversed(Base.metadata.tables.values()):
+    db.query(table).delete()
 
-    db.commit()
+db.commit()
 
 run('alembic upgrade head', shell=True)
 run(f"python -m pytest {' '.join(argv[1:])}", shell=True)

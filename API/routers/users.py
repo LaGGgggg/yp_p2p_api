@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from fastapi_login.exceptions import InvalidCredentialsException
 
 from sql import crud, models
-from sql.database import get_db, SessionLocal
+from sql.database import get_db, get_db_not_dependency
 from core import schemas
 from core.config import get_settings
 from core.login_manager import login_manager
@@ -27,18 +27,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def _get_user(username: str, db: Session) -> models.User | None:
-    return crud.UserCrud(db).get(username=username)
-
-
 @login_manager.user_loader()
-def get_user(username: str, db: Session | None = None) -> models.User | None:
-
-    if not db:
-        with SessionLocal() as db:
-            return _get_user(username, db)
-
-    return _get_user(username, db)
+def get_user(username: str, db: Session = get_db_not_dependency()) -> models.User | None:
+    return crud.UserCrud(db).get(username=username)
 
 
 @router.post(f'/{SETTINGS.TOKEN_URL}', response_model=schemas.Token)

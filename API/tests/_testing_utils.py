@@ -3,16 +3,6 @@ from typing import Generator
 from fastapi.testclient import TestClient
 
 from core.login_manager import login_manager
-from sql.database import SessionLocal
-
-
-class TestClientWithDb(TestClient):
-    def __init__(self, *args, **kwargs) -> None:
-
-        super().__init__(*args, **kwargs)
-
-        with SessionLocal() as db:
-            self.db = db
 
 
 class UserAccessCookie:

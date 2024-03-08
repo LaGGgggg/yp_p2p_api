@@ -5,7 +5,7 @@ from typing import Callable
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from sql.database import get_db_not_dependency
+from sql.database import SessionLocal
 from sql import crud
 from core import schemas
 
@@ -53,7 +53,8 @@ if __name__ == '__main__':
     if 'create_superuser' in argv and len(argv) == 5:
 
         try:
-            create_superuser(*argv[2:], db=get_db_not_dependency())
+            with SessionLocal() as db:
+                create_superuser(*argv[2:], db=db)
 
         except Exception as e:
             log_with_color(error, f'Something went wrong\n{e}', RED)

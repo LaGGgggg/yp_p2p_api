@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from sql import crud
-from sql.database import get_db, get_db_not_dependency
+from sql.database import get_db, SessionLocal
 from . import schemas
 from .config import get_settings
 from routers import system, users, p2p_request
@@ -16,13 +16,13 @@ SETTINGS = get_settings()
 @asynccontextmanager
 async def lifespan(_: FastAPI):
 
-    db = get_db_not_dependency()
+    with SessionLocal() as db:
 
-    all_scopes = [str(i) for i in crud.ScopeCrud(db).get_many()]
+        all_scopes = [str(i) for i in crud.ScopeCrud(db).get_many()]
 
-    for scope_name in SETTINGS.OAUTH2_SCHEME_SCOPES:
-        if scope_name not in all_scopes:
-            crud.ScopeCrud(db).create(schemas.ScopeCreate(name=scope_name))
+        for scope_name in SETTINGS.OAUTH2_SCHEME_SCOPES:
+            if scope_name not in all_scopes:
+                crud.ScopeCrud(db).create(schemas.ScopeCreate(name=scope_name))
 
     yield
 

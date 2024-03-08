@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ReviewStateChoicesEnum(Enum):
+class ReviewStateEnum(Enum):
 
     PENDING = 'pending'
     PROGRESS = 'progress'

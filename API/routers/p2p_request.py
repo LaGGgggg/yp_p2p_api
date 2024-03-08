@@ -5,6 +5,7 @@ from sql import crud, models
 from sql.database import get_db
 from core import schemas
 from core.login_manager import login_manager
+from sql.models_enums import ReviewStateEnum
 
 router = APIRouter(tags=['p2p_request'])
 
@@ -33,7 +34,7 @@ def p2p_request_review(
 
     p2p_request_crud = crud.P2PRequestCrud(db)
 
-    if p2p_request_crud.get(review_state=models.P2PRequest.PROGRESS, reviewer_id=current_user.id):
+    if p2p_request_crud.get(review_state=ReviewStateEnum.PROGRESS.value, reviewer_id=current_user.id):
         return schemas.ErrorResponse(context='You already have a review, complete it first')
 
     project = p2p_request_crud.start_review(current_user.id)

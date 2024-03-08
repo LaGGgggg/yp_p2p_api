@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from sql.models_choices_enums import ReviewStateChoicesEnum
+from sql.models_enums import ReviewStateEnum
 
 
 class Token(BaseModel):
@@ -63,14 +63,14 @@ class UserToScope(UserToScopeBase):
 class P2PRequestBase(BaseModel):
     repository_link: str
     comment: str
-    review_state: ReviewStateChoicesEnum
+    review_state: ReviewStateEnum
 
 
 class P2PRequestCreate(P2PRequestBase):
     creator_id: int
     reviewer_id: int | None = None
     review_start_date: datetime | None = None
-    review_state: ReviewStateChoicesEnum = ReviewStateChoicesEnum.PENDING.value
+    review_state: ReviewStateEnum = ReviewStateEnum.PENDING.value
 
 
 class P2PRequest(P2PRequestBase):

@@ -8,6 +8,7 @@ from passlib.context import CryptContext
 
 from core import schemas
 from . import models
+from sql.models_enums import ReviewStateEnum
 
 
 class BaseCrud(ABC):
@@ -68,14 +69,14 @@ class P2PRequestCrud(BaseCrud):
     def start_review(self, reviewer_id: int) -> models.P2PRequest | None:
 
         project = self.db.query(self.model).filter(
-            self.model.review_state == self.model.PENDING, self.model.creator_id != reviewer_id
+            self.model.review_state == ReviewStateEnum.PENDING.value, self.model.creator_id != reviewer_id
         ).order_by(self.model.publication_date).first()
 
         if not project:
             return None
 
         project.reviewer_id = reviewer_id
-        project.review_state = self.model.PROGRESS
+        project.review_state = ReviewStateEnum.PROGRESS.value
         project.review_start_date = datetime.now()
         self.db.commit()
 

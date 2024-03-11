@@ -1,9 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, UniqueConstraint, BigInteger, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, UniqueConstraint, BigInteger, DateTime, Enum
 from sqlalchemy.sql import func
-from sqlalchemy_utils import ChoiceType
 
 from .database import Base
-from .models_choices_enums import ReviewStateChoicesEnum
+from .models_enums import ReviewStateEnum
 
 
 class Scope(Base):
@@ -41,21 +40,14 @@ class UserToScope(Base):
 class P2PRequest(Base):
     __tablename__ = 'p2p_requests'
 
-    PENDING = ReviewStateChoicesEnum.PENDING.value
-    PROGRESS = ReviewStateChoicesEnum.PROGRESS.value
-    COMPLETED = ReviewStateChoicesEnum.COMPLETED.value
-
-    REVIEW_STATE_CHOICES = [
-        (PENDING, 'Pending'),
-        (PROGRESS, 'Progress'),
-        (COMPLETED, 'Completed'),
-    ]
-
     id = Column(Integer, primary_key=True, index=True)
     repository_link = Column(String, index=True, nullable=False)
     comment = Column(String, nullable=False, default='')
     creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     publication_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    review_state = Column(ChoiceType(REVIEW_STATE_CHOICES), nullable=False)
+    review_state = Column(
+        Enum(ReviewStateEnum, name='review_state_enums', values_callable=lambda obj: [e.value for e in obj]),
+        nullable=False,
+    )
     reviewer_id = Column(Integer, ForeignKey('users.id'))
     review_start_date = Column(DateTime(timezone=True))

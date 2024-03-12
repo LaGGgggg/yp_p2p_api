@@ -83,3 +83,23 @@ class P2PRequest(P2PRequestBase):
 
 class ErrorResponse(BaseModel):
     context: str
+
+
+class ReviewBase(BaseModel):
+    link: str
+
+
+class ReviewCreate(ReviewBase):
+    reviewer_id: int
+    p2p_request_id: int
+
+
+class Review(ReviewBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    reviewer_id: int
+    p2p_request_id: int
+    creation_date: datetime
+    end_date: datetime
+    review_state: ReviewStateEnum

@@ -62,11 +62,24 @@ class UserToScopeCrud(BaseCrud):
         return self.db.query(models.Scope).join(self.model).filter(self.model.user_id == user.id).all()
 
 
+class ReviewCrud(BaseCrud):
+    def __init__(self, db: Session) -> None:
+        super().__init__(models.P2PReview, db)
+
+    def end_review(self, reviewer_id: int, link: str) -> None:
+
+        review = self.get(reviewer_id=reviewer_id)
+        review.link = link
+        review.end_date = datetime.now()
+        review.review_state = ReviewStateEnum.COMPLETED.value
+        self.db.commit()
+
+
 class P2PRequestCrud(BaseCrud):
     def __init__(self, db: Session) -> None:
         super().__init__(models.P2PRequest, db)
 
-    def start_review(self, reviewer_id: int) -> models.P2PRequest | None:
+    def start_review(self, reviewer_id: int, create_schema: schemas.ReviewCreate) -> models.P2PRequest | None:
 
         project = self.db.query(self.model).filter(
             self.model.review_state == ReviewStateEnum.PENDING.value, self.model.creator_id != reviewer_id
@@ -75,9 +88,6 @@ class P2PRequestCrud(BaseCrud):
         if not project:
             return None
 
-        project.reviewer_id = reviewer_id
-        project.review_state = ReviewStateEnum.PROGRESS.value
-        project.review_start_date = datetime.now()
-        self.db.commit()
+        ReviewCrud(self.db).create(create_schema)
 
         return project

@@ -26,8 +26,8 @@ def create_p2p_request(
     return True
 
 
-@router.get('/p2p_request/review')
-def p2p_request_review(
+@router.get('/p2p_request/review/start')
+def p2p_request_start_review(
         current_user: models.User = Security(login_manager, scopes=['p2p_request']),
         db: Session = Depends(get_db)
 ) -> schemas.P2PRequest | schemas.ErrorResponse:
@@ -43,3 +43,23 @@ def p2p_request_review(
         return schemas.ErrorResponse(context='There are not any pending projects')
 
     return schemas.P2PRequest.model_validate(project)
+
+
+@router.post('/p2p_request/review/complete')
+def complete_review(
+        link: str,
+        p2p_request_id: int,
+        current_user: models.User = Security(login_manager, scopes=['p2p_request']),
+        db: Session = Depends(get_db)
+) -> bool | schemas.ErrorResponse:
+
+    reviewer_id = current_user.id
+
+    review_crud = crud.ReviewCrud(db)
+
+    if not review_crud.get(review_state=ReviewStateEnum.PROGRESS.value, reviewer_id=reviewer_id):
+        return schemas.ErrorResponse(context='Review not found')
+
+    review_crud.end_review(reviewer_id=reviewer_id, link=link)
+
+    return True

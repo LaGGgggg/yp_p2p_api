@@ -16,9 +16,6 @@ client = TestClient(app)
 
 db = get_db_not_dependency()
 
-for scope_name in SETTINGS.OAUTH2_SCHEME_SCOPES:
-    ScopeCrud(db).create(schemas.ScopeCreate(name=scope_name))
-
 test_user_1_create_schema = schemas.UserCreate(
     username='username_1', password='password_1', discord_id=next(get_new_discord_id)
 )

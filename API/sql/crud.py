@@ -82,7 +82,7 @@ class UserToScopeCrud(BaseCrud):
         super().__init__(models.UserToScope, db)
 
     def get_user_scopes(self, user: schemas.User) -> list[models.Scope]:
-        return self._get_query().join(self.model).filter(self.model.user_id == user.id).all()
+        return self.db.query(models.Scope).join(self.model).filter(self.model.user_id == user.id).all()
 
 
 class P2PReviewCrud(BaseCrud):

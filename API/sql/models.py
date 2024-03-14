@@ -58,7 +58,7 @@ class P2PReview(Base):
     __tablename__ = 'p2p_reviews'
 
     id = Column(Integer, primary_key=True, index=True)
-    link = Column(String, nullable=False)
+    link = Column(String)
     creation_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     end_date = Column(DateTime(timezone=True))
     review_state = Column(

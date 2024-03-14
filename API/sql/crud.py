@@ -1,14 +1,12 @@
 from .database import Base
 from typing import Type, Any
 from abc import ABC
-from datetime import datetime
 
 from sqlalchemy.orm import Session, Query
 from passlib.context import CryptContext
 
 from core import schemas
 from . import models
-from sql.models_enums import ReviewStateEnum
 
 
 class BaseCrud(ABC):
@@ -87,32 +85,16 @@ class UserToScopeCrud(BaseCrud):
         return self._get_query().join(self.model).filter(self.model.user_id == user.id).all()
 
 
-class ReviewCrud(BaseCrud):
+class P2PReviewCrud(BaseCrud):
     def __init__(self, db: Session) -> None:
         super().__init__(models.P2PReview, db)
-
-    def end_review(self, reviewer_id: int, link: str) -> None:
-
-        review = self.get(reviewer_id=reviewer_id)
-        review.link = link
-        review.end_date = datetime.now()
-        review.review_state = ReviewStateEnum.COMPLETED.value
-        self.db.commit()
 
 
 class P2PRequestCrud(BaseCrud):
     def __init__(self, db: Session) -> None:
         super().__init__(models.P2PRequest, db)
 
-    def start_review(self, reviewer_id: int, create_schema: schemas.ReviewCreate) -> models.P2PRequest | None:
-
-        project = self.db.query(self.model).filter(
-            self.model.review_state == ReviewStateEnum.PENDING.value, self.model.creator_id != reviewer_id
+    def get_oldest_not_user_without_reviews(self, reviewer_id: int) -> models.P2PRequest | None:
+        return self._get_query().filter(
+            ~self.model.p2p_reviews.any(), self.model.creator_id != reviewer_id
         ).order_by(self.model.publication_date).first()
-
-        if not project:
-            return None
-
-        ReviewCrud(self.db).create(create_schema)
-
-        return project

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Security
 from sqlalchemy.orm import Session
 
@@ -32,34 +34,41 @@ def p2p_request_start_review(
         db: Session = Depends(get_db)
 ) -> schemas.P2PRequest | schemas.ErrorResponse:
 
-    p2p_request_crud = crud.P2PRequestCrud(db)
+    reviewer_id = current_user.id
+    p2p_review_crud = crud.P2PReviewCrud(db)
 
-    if p2p_request_crud.get(review_state=ReviewStateEnum.PROGRESS.value, reviewer_id=current_user.id):
+    if p2p_review_crud.get(review_state=ReviewStateEnum.PROGRESS.value, reviewer_id=reviewer_id):
         return schemas.ErrorResponse(context='You already have a review, complete it first')
 
-    project = p2p_request_crud.start_review(current_user.id)
+    p2p_request = crud.P2PRequestCrud(db).get_oldest_not_user_without_reviews(reviewer_id)
 
-    if not project:
+    if not p2p_request:
         return schemas.ErrorResponse(context='There are not any pending projects')
 
-    return schemas.P2PRequest.model_validate(project)
+    p2p_review_crud.create(schemas.P2PReviewCreate(reviewer_id=reviewer_id, p2p_request_id=p2p_request.id))
+
+    return schemas.P2PRequest.model_validate(p2p_request)
 
 
 @router.post('/p2p_request/review/complete')
-def complete_review(
+def p2p_request_complete_review(
         link: str,
         p2p_request_id: int,
         current_user: models.User = Security(login_manager, scopes=['p2p_request']),
         db: Session = Depends(get_db)
-) -> bool | schemas.ErrorResponse:
+) -> schemas.P2PReview | schemas.ErrorResponse:
 
     reviewer_id = current_user.id
 
-    review_crud = crud.ReviewCrud(db)
+    review_crud = crud.P2PReviewCrud(db)
 
-    if not review_crud.get(review_state=ReviewStateEnum.PROGRESS.value, reviewer_id=reviewer_id):
+    review = review_crud.get(
+        p2p_request_id=p2p_request_id, review_state=ReviewStateEnum.PROGRESS.value, reviewer_id=reviewer_id
+    )
+
+    if not review:
         return schemas.ErrorResponse(context='Review not found')
 
-    review_crud.end_review(reviewer_id=reviewer_id, link=link)
+    review_crud.update(review, link=link, end_date=datetime.now(), review_state=ReviewStateEnum.COMPLETED.value)
 
-    return True
+    return schemas.P2PReview.model_validate(review)

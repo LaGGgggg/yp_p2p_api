@@ -63,14 +63,10 @@ class UserToScope(UserToScopeBase):
 class P2PRequestBase(BaseModel):
     repository_link: str
     comment: str
-    review_state: ReviewStateEnum
 
 
 class P2PRequestCreate(P2PRequestBase):
     creator_id: int
-    reviewer_id: int | None = None
-    review_start_date: datetime | None = None
-    review_state: ReviewStateEnum = ReviewStateEnum.PENDING.value
 
 
 class P2PRequest(P2PRequestBase):
@@ -78,8 +74,28 @@ class P2PRequest(P2PRequestBase):
   
     id: int
     publication_date: datetime
-    review_start_date: datetime | None
 
 
 class ErrorResponse(BaseModel):
     context: str
+
+
+class P2PReviewBase(BaseModel):
+    pass
+
+
+class P2PReviewCreate(P2PReviewBase):
+    reviewer_id: int
+    p2p_request_id: int
+
+
+class P2PReview(P2PReviewBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    reviewer_id: int
+    p2p_request_id: int
+    creation_date: datetime
+    end_date: datetime
+    review_state: ReviewStateEnum
+    link: str

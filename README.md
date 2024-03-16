@@ -49,7 +49,7 @@ ALGORITHM=HS256
 DEBUG=True
 DATABASE_URL_TEST=postgresql://<username>:<password>@localhost:5432/<database_name>  # не является обязательным
 ```
-_**Не забудьте поменять значения на свои! (поставьте его после "=")**_
+_**Не забудьте поменять значения на свои! (поставьте их после "=")**_
 
 #### Больше о переменных:
 SECRET_KEY - [секретный ключ](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/?h=secret#handle-jwt-tokens)
@@ -120,7 +120,7 @@ POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
 PGDATA=/var/lib/postgresql/data/pgdata
 ```
-_**Не забудьте поменять значения на свои! (поставьте его после "=")**_
+_**Не забудьте поменять значения на свои! (поставьте их после "=")**_
 
 #### Больше о переменных:
 SECRET_KEY - [секретный ключ](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/?h=secret#handle-jwt-tokens)
@@ -142,7 +142,7 @@ POSTGRES_HOST - [POSTGRES_HOST](https://hub.docker.com/_/postgres) станда�
 POSTGRES_PORT - [POSTGRES_PORT](https://hub.docker.com/_/postgres) стандартная переменная окружения docker<br>
 PGDATA - [PGDATA](https://hub.docker.com/_/postgres) стандартная переменная окружения docker<br>
 
-### 6. Настройте [nginx.conf](nginx/nginx.conf)
+### 6. Настройте [nginx/nginx.conf](nginx/nginx.conf)
 
 Настройте доменное имя (вставьте его в кавычки, вместо domain.site):
 ```nginx configuration

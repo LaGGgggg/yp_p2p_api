@@ -9,4 +9,4 @@ echo "${PURPLE}Apply database migrations${NO_COLOR}"
 alembic upgrade head
 
 echo "${PURPLE}Run server${NO_COLOR}"
-uvicorn core.main:app --port 8000
+uvicorn core.main:app --port 8000 --host 0.0.0.0

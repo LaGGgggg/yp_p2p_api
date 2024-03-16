@@ -105,7 +105,7 @@ cd yp_p2p_api
 
 ```dotenv
 SECRET_KEY=<your_secret_key>
-DATABASE_URL=postgresql://<username>:<password>@localhost:5432/<database_name>
+DATABASE_URL=postgresql://<username>:<password>@postgres:5432/<database_name>
 ORIGINS="http://127.0.0.1:8000, http://localhost:8000"
 ACCESS_TOKEN_EXPIRE_MINUTES=120
 TOKEN_URL=token

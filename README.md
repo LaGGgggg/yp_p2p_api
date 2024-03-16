@@ -146,7 +146,9 @@ PGDATA - [PGDATA](https://hub.docker.com/_/postgres) стандартная пе
 
 Настройте доменное имя (вставьте его в кавычки, вместо domain.site):
 ```nginx configuration
-set $domain_name "domain.site";
+map $host $domain_name {
+    default "domain.site";
+}
 ```
 
 ### 7. Настройте [docker-compose-init.sh](docker-compose-init.sh)

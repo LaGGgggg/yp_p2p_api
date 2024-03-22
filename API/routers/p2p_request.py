@@ -29,7 +29,7 @@ def create_p2p_request(
 
 
 @router.get('/p2p_request/list')
-def get_p2p_reviews_list(
+def get_p2p_requests_list(
         current_user: models.User = Security(login_manager, scopes=['p2p_request'])
 ) -> list[schemas.P2PRequest]:
     return [schemas.P2PRequest.model_validate(p2p_request) for p2p_request in current_user.p2p_requests]

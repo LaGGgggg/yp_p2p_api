@@ -72,3 +72,23 @@ def p2p_request_complete_review(
     review_crud.update(review, link=link, end_date=datetime.now(), review_state=ReviewStateEnum.COMPLETED.value)
 
     return schemas.P2PReview.model_validate(review)
+
+
+@router.get('/p2p_request/review/list')
+def get_p2p_reviews_list(
+        review_state: ReviewStateEnum = None,
+        current_user: models.User = Security(login_manager, scopes=['p2p_request']),
+        db: Session = Depends(get_db),
+) -> list[schemas.P2PReview]:
+
+    filter_kwargs = {'reviewer_id': current_user.id}
+
+    if review_state:
+        filter_kwargs['review_state'] = review_state
+
+    p2p_reviews_list = []
+
+    for p2p_review in crud.P2PReviewCrud(db).get_many(**filter_kwargs):
+        p2p_reviews_list.append(schemas.P2PReview.model_validate(p2p_review))
+
+    return p2p_reviews_list

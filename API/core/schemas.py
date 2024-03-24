@@ -96,6 +96,6 @@ class P2PReview(P2PReviewBase):
     reviewer_id: int
     p2p_request_id: int
     creation_date: datetime
-    end_date: datetime
+    end_date: datetime | None
     review_state: ReviewStateEnum
-    link: str
+    link: str | None

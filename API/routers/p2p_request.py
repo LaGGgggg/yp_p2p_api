@@ -60,18 +60,14 @@ def p2p_request_start_review(
 @router.post('/p2p_request/review/complete')
 def p2p_request_complete_review(
         link: str,
-        p2p_request_id: int,
-        current_user: models.User = Security(login_manager, scopes=['p2p_request']),
-        db: Session = Depends(get_db)
+        p2p_review_id: int,
+        db: Session = Depends(get_db),
+        _: models.User = Security(login_manager, scopes=['p2p_request']),
 ) -> schemas.P2PReview | schemas.ErrorResponse:
-
-    reviewer_id = current_user.id
 
     review_crud = crud.P2PReviewCrud(db)
 
-    review = review_crud.get(
-        p2p_request_id=p2p_request_id, review_state=ReviewStateEnum.PROGRESS.value, reviewer_id=reviewer_id
-    )
+    review = review_crud.get(id=p2p_review_id)
 
     if not review:
         return schemas.ErrorResponse(context='Review not found')

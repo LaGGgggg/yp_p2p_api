@@ -12,7 +12,8 @@ from subprocess import run
 from sql.database import get_db_not_dependency
 from sql.models import Base
 
-
+# TODO Решили же, что это лишняя функция. Можно было бы использовать ту же функцию, что и для апишки. 
+# Можно было использовать метод next 
 db = get_db_not_dependency()
 
 for table in reversed(Base.metadata.tables.values()):

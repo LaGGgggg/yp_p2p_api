@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict
 
 from sql.models_enums import ReviewStateEnum
 
-
+# TODO Как-то очень много схем, я бы думаю по разным файликам побил
 class Token(BaseModel):
     access_token: str
     token_type: str

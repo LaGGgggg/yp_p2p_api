@@ -23,7 +23,7 @@ def log_with_color(log_function: Callable, message: str, color: str = BLUE) -> N
 
 
 def create_superuser(username: str, password: str, discord_id: str, db: Session) -> None:
-
+    # TODO Че за дискорд айдишник
     discord_id = int(discord_id)
 
     try:

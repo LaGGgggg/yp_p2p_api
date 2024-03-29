@@ -19,7 +19,8 @@ class BaseCrud(ABC):
 
     def _get_query_filtered(self, **kwargs) -> Query:
         return self._get_query().filter_by(**kwargs)
-
+    
+    # TODO Статикметоды обычно висят с самого верху класса
     @staticmethod
     def _get_as_list(object_to_get: Any) -> list[Any]:
         return object_to_get if isinstance(object_to_get, list) else [object_to_get]

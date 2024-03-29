@@ -8,7 +8,7 @@ from sql.crud import UserCrud, ScopeCrud, UserToScopeCrud
 from sql.database import get_db_not_dependency
 from _testing_utils import UserAccessCookie, get_new_discord_id, get_field_detail_type
 
-
+# TODO Будто очень жирный файл вышел, плюс фикстур чет не увидел
 SETTINGS = get_settings()
 
 client = TestClient(app)

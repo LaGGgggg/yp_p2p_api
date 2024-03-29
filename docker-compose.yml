@@ -3,9 +3,12 @@ version: "3.9"
 services:
 
   postgres:
+    # TODO Лучше указывать конкретную версию
     image: postgres:latest
     restart: always
     networks:
+    # TODO Ну по факту две лишние строки, у нас же и так все создается в одной сети. Хотя можно смотреть как на будущее,
+    # вдруг понадобится какие-то апдейты для сети
       - backend
     volumes:
       - postgres_data:/var/lib/postgresql/data

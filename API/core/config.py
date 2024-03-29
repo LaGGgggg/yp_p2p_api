@@ -78,7 +78,7 @@ class Settings(BaseSettings):
 
 @cache
 def get_settings() -> Settings:
-
+    # TODO  Вообще пайдэнтик сам умеет в парсинг энва, а тут по факту это и происходит?
     load_dotenv('core/.env')
 
     if origins := environ.get('ORIGINS', None):

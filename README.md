@@ -2,6 +2,9 @@
 ![GitHub watchers](https://img.shields.io/github/watchers/LaGGgggg/yp_p2p_api?style=flat)
 ![GitHub last commit](https://img.shields.io/github/last-commit/LaGGgggg/yp_p2p_api)
 
+> [!WARNING]
+> Этот репозиторий **заархивирован** и более не поддерживается
+
 # API для p2p оценки проектов студентов в Яндекс практикуме
 
 # Как запустить проект?

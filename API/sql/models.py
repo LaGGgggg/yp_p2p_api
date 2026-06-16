@@ -45,6 +45,7 @@ class P2PRequest(Base):
     __tablename__ = 'p2p_requests'
 
     id = Column(Integer, primary_key=True, index=True)
+    # TODO Вот здесь индекс мне кажется лишний
     repository_link = Column(String, index=True, nullable=False)
     comment = Column(String, nullable=False, default='')
     creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)

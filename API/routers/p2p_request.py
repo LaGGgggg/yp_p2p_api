@@ -11,7 +11,7 @@ from sql.models_enums import ReviewStateEnum
 
 router = APIRouter(tags=['p2p_request'])
 
-
+# TODO В декораторе можно же указать response_model
 @router.post('/p2p_request/create')
 def create_p2p_request(
         repository_link: str,
@@ -27,7 +27,8 @@ def create_p2p_request(
 
     return True
 
-
+# TODO Вообще еще можно тут почитать про DDD, мне как-то больше в реалиях фастапи он нравится.
+# Это конечно порождает еще один класс, но система становится супер мобильной
 @router.get('/p2p_request/review/start')
 def p2p_request_start_review(
         current_user: models.User = Security(login_manager, scopes=['p2p_request']),
